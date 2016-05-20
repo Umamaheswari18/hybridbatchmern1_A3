@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+  <head>
+        <meta charset="utf-8">
+        <title>Bar Graph</title>
+	      <style>
+
+            rect
+            {
+              fill:#cc99ff ;
+            }
+
+            text{
+              height:100px;
+            }
+
+          	.axis {
+          	  font: 10px sans-serif;
+          	}
+
+          	.axis path,
+          	.axis line {
+          	  fill: none;
+          	  stroke: #000000;
+          	  shape-rendering: crispEdges;
+          	}
+
+	      </style>
+  </head>
+
+  <body>
+
+      <h1> Education-Category wise Literate-Population </h1>
+      <script src="d3.js"></script>
+
+      <script>
+
+          // set the dimensions of SVG
+          var margin = {top: 20, right: 20, bottom: 70, left: 80};
+          var width = 500 - margin.left - margin.right;
+          var height = 500 - margin.top - margin.bottom;
+
+
+          // set the ranges of X and Y Axis
+          var x = d3.scale.ordinal().rangeRoundBands([0, width], .05);
+
+          var y = d3.scale.linear().range([height, 0]);
+
+          // Define the axis
+          var xAxis = d3.svg.axis()
+                .scale(x)
+                .orient("bottom")
+
+
+          var yAxis = d3.svg.axis()
+                .scale(y)
+                .orient("left");
+
+
+          // Add the SVG element
+          var svg = d3.select("body").append("svg")
+              .attr("width", width + margin.left + margin.right)
+              .attr("height", height + margin.top + margin.bottom)
+              .append("g")
+              .attr("transform",
+                    "translate(" + margin.left + "," + margin.top + ")");
+
+
+          // Reading the JSON File
+          d3.json("result2.json", function(error, data) {
+              if(error) console.log(error);
+              data.forEach(function(d)
+              {
+                  d.Education_Level = d.Education_Level;
+                  d.Literate_Persons = + parseInt(d.Literate_Persons);
+              });
+
+          // scale the range of the data
+          x.domain(data.map(function(d) { return d.Education_Level; }));
+          y.domain([0, d3.max(data, function(d) { return d.Literate_Persons; })]);
+
+          // X-Axis
+          svg.append("g")
+              .attr("class", "x axis")
+              .attr("transform", "translate(0," + height + ")")
+              .call(xAxis)
+              .selectAll("text")
+              .style("text-anchor", "end")
+              .attr("dx", "-.8em")
+              .attr("dy", "-.55em")
+              .attr("transform", "rotate(-30)" );
+
+          // Y-Axis
+          svg.append("g")
+                .attr("class", "y axis")
+                .call(yAxis)
+                .append("text")
+                .attr("transform", "rotate(-90)")
+                .attr("y", 5)
+                .attr("dy", ".71em")
+                .style("text-anchor", "end")
+                .text("(Population * 1000000)");
+
+
+          // Add bar chart
+          svg.selectAll("rect")
+              .data(data)
+              .enter().append("rect")
+              .attr("class", "rect")
+              .attr("x", function(d) { return x(d.Education_Level); })
+              .attr("width", x.rangeBand())
+              .attr("y", function(d) { return y(parseInt(d.Literate_Persons)); })
+              .attr("height", function(d) { return height - y(parseInt(d.Literate_Persons)); });
+
+        });
+
+    </script>
+
+  </body>
+</html>

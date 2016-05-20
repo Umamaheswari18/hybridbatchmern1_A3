@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+  <head>
+        <meta  charset="utf-8">
+
+        <title>Pie Chart</title>
+
+        <script type="text/javascript" src="d3.js"></script>
+
+        <style type="text/css">
+                .slice text
+                {
+                    font-size: 16pt;
+                    font-family: Arial;
+                }
+
+                svg
+                {
+                  background-color: #e6e6e6;
+                  padding-left: 100px;
+                  padding-right: 100px;
+                }
+
+        </style>
+  </head>
+  <body>
+
+      <center><h1>Age-wise Literate Population</h1></center>
+          <script type="text/javascript">
+
+              //Creating the SVG Width and Height
+              var canvasWidth = 1500,
+                  canvasHeight = 1500,
+                  outerRadius = 400,
+                  color = d3.scale.category20();
+
+              d3.json("result.json", function(error, data)
+              {
+                    if(error) console.log(error);
+                    data.forEach(function(d)
+                    {
+                        d.Age_Group = d.Age_Group;
+                        d.Literate_Persons = d.Literate_Persons;
+                    });
+
+                    //Creating the SVG Element with our data
+
+                    var vis = d3.select("body")
+                          .append("svg:svg")
+                          .data([data])
+                          .attr("width", canvasWidth)
+                          .attr("height", canvasHeight)
+                          .append("svg:g")
+                          .attr("transform", "translate(" + 1.5*outerRadius + "," + 1.5*outerRadius + ")");
+
+
+                    // Creating the Ara
+                    var arc = d3.svg.arc()
+                              .outerRadius(outerRadius);
+
+                    //Adding the data to Arc
+                    var pie = d3.layout.pie()
+                              .value(function(d) { return d.Literate_Persons; })
+                              .sort( function(d) { return null; } );
+
+
+                  var arcs = vis.selectAll("g.slice")
+                              .data(pie)
+                              .enter()
+                              .append("svg:g")
+                              .attr("class", "slice");
+
+                  arcs.append("svg:path")
+                    .attr("fill", function(d, i) { return color(i); } )
+                    .attr("d", arc);
+
+                  // Add a Label to each arc slice
+                  arcs.append("svg:text")
+                      .attr("transform", function(d) {
+                      d.outerRadius = outerRadius + 50;
+                      d.innerRadius = outerRadius + 45;
+                      return "translate(" + arc.centroid(d) + ")";
+                    })
+                    .attr("text-anchor", "middle")
+                    .style("fill", "Purple")
+                    .style("font", "bold 12px Arial")
+                    .text(function(d, i) { return data[i].Age_Group; });
+
+                    //Add a data inside pie
+                    arcs.append("svg:text")
+                      .attr("dy", ".5em")
+                      .attr("text-anchor", "middle")
+                      .attr("transform", function(d) {
+                        d.outerRadius = outerRadius;
+                        d.innerRadius = outerRadius/2;
+                        return "translate(" + arc.centroid(d) + ")rotate(" + angle(d) + ")";
+                      })
+                      .style("fill", "White")
+                      .style("font", "bold 10px Arial")
+                      .text(function(d) { return d.data.Literate_Persons; });
+
+
+                      // Computes the angle of an arc, converting from radians to degrees.
+                      function angle(d) {
+                        var a = (d.startAngle + d.endAngle) * 90 / Math.PI - 90;
+                        return a > 90 ? a - 180 : a;
+                      }
+
+
+
+                  });
+
+
+        </script>
+  </body>
+</html>
